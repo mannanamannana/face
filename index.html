@@ -2,221 +2,196 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AR Hair Beast</title>
-<script src="https://unpkg.com/@vladmandic/face-api/dist/face-api.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Camera Base</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
-body{background:#000;color:#fff;overflow:hidden;display:flex;height:100vh}
-#container{position:relative;flex:1;display:flex;justify-content:center;align-items:center}
-video,canvas{position:absolute;width:100%;height:100%;object-fit:cover}
-#video{display:none}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
 
-/* Sidebar */
-#panel{
+body{
+background:#000;
+overflow:hidden;
+height:100vh;
+display:flex;
+}
+
+/* Camera Container */
+#camera-container{
+position:relative;
+flex:1;
+height:100vh;
+overflow:hidden;
+}
+
+/* Video */
+video{
 position:absolute;
-right:0;
 top:0;
-width:300px;
+left:0;
+width:100%;
 height:100%;
-background:#111;
-border-left:1px solid #222;
-transform:translateX(100%);
-transition:0.4s;
-padding:20px;
-overflow-y:auto;
+object-fit:cover;
+}
+
+/* Glass Panel */
+#glass-panel{
+position:absolute;
+top:0;
+right:0;
+height:100%;
+width:340px;
+padding:30px;
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(25px);
+-webkit-backdrop-filter:blur(25px);
+border-left:1px solid rgba(255,255,255,0.15);
+color:#fff;
+display:flex;
+flex-direction:column;
+gap:20px;
 z-index:10;
 }
-#panel.open{transform:translateX(0)}
 
-#toggle{
-position:absolute;
-right:15px;
-top:15px;
-background:#fff;
-color:#000;
-border:none;
-padding:8px 14px;
-cursor:pointer;
-z-index:11;
+/* Heading */
+#glass-panel h1{
+font-size:20px;
+font-weight:500;
+letter-spacing:1px;
 }
 
-h2{margin-bottom:15px}
-
-.hairstyle{
+/* Placeholder area */
+.placeholder{
+flex:1;
+border:1px solid rgba(255,255,255,0.15);
+border-radius:14px;
 display:flex;
 align-items:center;
-gap:10px;
-background:#1a1a1a;
-padding:10px;
-margin-bottom:10px;
-cursor:pointer;
-border:1px solid #222;
-transition:0.3s;
+justify-content:center;
+opacity:.6;
 }
-.hairstyle:hover{background:#333}
-.hairstyle img{width:60px}
 
-.control-group{margin:15px 0}
-input[type=range]{width:100%}
-input[type=color]{width:100%;height:40px;border:none}
+/* Camera controls */
+.controls{
+display:flex;
+flex-direction:column;
+gap:12px;
+}
 
-#capture{
-width:100%;
-padding:10px;
+button{
+padding:12px;
+border:none;
 background:#fff;
 color:#000;
-border:none;
 cursor:pointer;
-margin-top:15px;
+border-radius:10px;
+font-weight:500;
+transition:.2s;
+}
+
+button:hover{
+transform:scale(1.03);
+}
+
+/* Mobile responsiveness */
+@media(max-width:900px){
+
+#glass-panel{
+width:100%;
+height:200px;
+bottom:0;
+top:auto;
+border-left:none;
+border-top:1px solid rgba(255,255,255,0.15);
+flex-direction:column;
+}
+
+#camera-container{
+height:100vh;
+}
+
 }
 </style>
 </head>
 
 <body>
 
-<div id="container">
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas"></canvas>
+<div id="camera-container">
+<video id="video" autoplay playsinline muted></video>
+
+<div id="glass-panel">
+<h1>Camera</h1>
+
+<div class="placeholder">
+Hairstyles will appear here
 </div>
 
-<button id="toggle">MENU</button>
-
-<div id="panel">
-<h2>Choose Style</h2>
-
-<div class="hairstyle" data-url="https://i.imgur.com/8Km9tLL.png">
-<img src="https://i.imgur.com/8Km9tLL.png"> Braids
+<div class="controls">
+<button id="switch-camera">Switch Camera</button>
+<button id="capture">Capture</button>
 </div>
 
-<div class="hairstyle" data-url="https://i.imgur.com/jNNT4LE.png">
-<img src="https://i.imgur.com/jNNT4LE.png"> Afro
 </div>
-
-<div class="hairstyle" data-url="https://i.imgur.com/o5uMfKo.png">
-<img src="https://i.imgur.com/o5uMfKo.png"> Dreads
-</div>
-
-<h2>Adjust</h2>
-
-<div class="control-group">
-<label>Color</label>
-<input type="color" id="colorPicker" value="#ffffff">
-</div>
-
-<div class="control-group">
-<label>Opacity</label>
-<input type="range" id="opacity" min="0" max="1" step="0.01" value="1">
-</div>
-
-<button id="capture">Capture & Download</button>
-
 </div>
 
 <script>
-const video=document.getElementById('video');
-const canvas=document.getElementById('canvas');
-const ctx=canvas.getContext('2d');
+const video = document.getElementById("video");
+let currentStream;
+let usingFrontCamera = true;
 
-let hairImage=new Image();
-let currentHair=null;
-let lastDetection=null;
+/* Start Camera */
+async function startCamera() {
 
-let smooth={x:0,y:0,width:0,height:0,angle:0};
+if(currentStream){
+currentStream.getTracks().forEach(track=>track.stop());
+}
 
-document.getElementById('toggle').onclick=()=>{
-document.getElementById('panel').classList.toggle('open');
-};
-
-document.querySelectorAll('.hairstyle').forEach(el=>{
-el.onclick=()=>{
-hairImage.src=el.dataset.url;
-currentHair=el.dataset.url;
-};
+try{
+const stream = await navigator.mediaDevices.getUserMedia({
+video:{
+facingMode: usingFrontCamera ? "user" : "environment"
+},
+audio:false
 });
 
-async function init(){
+video.srcObject = stream;
+currentStream = stream;
 
-await faceapi.nets.tinyFaceDetector.loadFromUri('https://unpkg.com/@vladmandic/face-api/model');
-await faceapi.nets.faceLandmark68Net.loadFromUri('https://unpkg.com/@vladmandic/face-api/model');
-
-const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}});
-video.srcObject=stream;
-
-video.onloadedmetadata=()=>{
-canvas.width=video.videoWidth;
-canvas.height=video.videoHeight;
-detect();
-render();
-};
+}catch(err){
+alert("Camera permission denied or unavailable.");
+console.error(err);
+}
 }
 
-async function detect(){
-lastDetection=await faceapi
-.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions())
-.withFaceLandmarks();
-setTimeout(detect,200);
-}
+startCamera();
 
-function render(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-ctx.drawImage(video,0,0,canvas.width,canvas.height);
+/* Switch Camera */
+document.getElementById("switch-camera").addEventListener("click",()=>{
+usingFrontCamera = !usingFrontCamera;
+startCamera();
+});
 
-if(lastDetection && hairImage.complete){
-
-const landmarks=lastDetection.landmarks;
-const jaw=landmarks.getJawOutline();
-const left=jaw[0];
-const right=jaw[16];
-
-const faceWidth=Math.hypot(right.x-left.x,right.y-left.y);
-const centerX=(left.x+right.x)/2;
-const brow=landmarks.getLeftEyeBrow()[2];
-
-const angle=Math.atan2(right.y-left.y,right.x-left.x);
-
-const target={
-x:centerX,
-y:brow.y,
-width:faceWidth*1.6,
-height:hairImage.height*(faceWidth*1.6/hairImage.width),
-angle:angle
-};
-
-// smoothing
-for(let key in target){
-smooth[key]+= (target[key]-smooth[key])*0.2;
-}
-
-ctx.save();
-ctx.translate(smooth.x,smooth.y - smooth.height*0.6);
-ctx.rotate(smooth.angle);
-ctx.globalAlpha=document.getElementById('opacity').value;
-
-// color tint
-ctx.drawImage(hairImage,-smooth.width/2,-smooth.height/2,smooth.width,smooth.height);
-ctx.globalCompositeOperation="source-atop";
-ctx.fillStyle=document.getElementById('colorPicker').value;
-ctx.fillRect(-smooth.width/2,-smooth.height/2,smooth.width,smooth.height);
-ctx.globalCompositeOperation="source-over";
-
-ctx.restore();
-}
-
-requestAnimationFrame(render);
-}
-
-document.getElementById('capture').onclick=()=>{
-const link=document.createElement('a');
-link.download="ar-hair.png";
-link.href=canvas.toDataURL();
+/* Capture */
+document.getElementById("capture").addEventListener("click",()=>{
+const canvas = document.createElement("canvas");
+canvas.width = video.videoWidth;
+canvas.height = video.videoHeight;
+const ctx = canvas.getContext("2d");
+ctx.drawImage(video,0,0);
+const link = document.createElement("a");
+link.download = "photo.png";
+link.href = canvas.toDataURL();
 link.click();
-};
+});
 
-init();
+/* Resize handling */
+window.addEventListener("resize",()=>{
+});
 </script>
 
 </body>
 </html>
-
