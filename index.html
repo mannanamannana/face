@@ -27,7 +27,6 @@ video{
   width:100%;
   height:100%;
   object-fit:cover;
-  /* Mirroring handled dynamically via JS */
 }
 
 /* 🔥 Premium Peel Above Buttons */
@@ -53,16 +52,16 @@ video{
   padding:0 20px;
   gap:15px;
   overflow-x:auto;
-  overflow-y:hidden; /* hide vertical overflow */
+  overflow-y:hidden;
 }
 
 /* Hide scrollbar but keep scroll functionality */
 #peel::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+  display: none; 
 }
 #peel {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  
+  scrollbar-width: none;  
 }
 
 /* Hover / Press effect */
@@ -70,6 +69,29 @@ video{
 #peel.active{
   transform:translateX(-50%) scale(1.05);
   background:rgba(0,0,0,0.35);
+}
+
+/* Hairstyle placeholders */
+.hairstyle{
+  min-width:120px;
+  height:70px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.1);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:.2s;
+  font-size:14px;
+  font-weight:600;
+  color:#fff;
+  text-transform:capitalize;
+}
+
+.hairstyle:hover{
+  transform:scale(1.1);
+  background:rgba(255,255,255,0.2);
 }
 
 /* Controls Container */
@@ -144,25 +166,6 @@ video{
   border-radius:50%;
   border:4px solid #000;
 }
-
-/* Hairstyle placeholders */
-.hairstyle{
-  min-width:70px;
-  height:70px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.1);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  flex-shrink:0;
-  transition:.2s;
-}
-
-.hairstyle:hover{
-  transform:scale(1.1);
-  background:rgba(255,255,255,0.2);
-}
 </style>
 </head>
 
@@ -172,16 +175,15 @@ video{
 
 <!-- Peel Above Buttons -->
 <div id="peel">
-  <!-- 9 Hairstyle placeholders -->
-  <div class="hairstyle"></div>
-  <div class="hairstyle"></div>
-  <div class="hairstyle"></div>
-  <div class="hairstyle"></div>
-  <div class="hairstyle"></div>
-  <div class="hairstyle"></div>
-  <div class="hairstyle"></div>
-  <div class="hairstyle"></div>
-  <div class="hairstyle"></div>
+  <div class="hairstyle">Box Braids</div>
+  <div class="hairstyle">Cornrows</div>
+  <div class="hairstyle">Afro Puff</div>
+  <div class="hairstyle">Dreadlocks</div>
+  <div class="hairstyle">Bantu Knots</div>
+  <div class="hairstyle">Senegalese Twists</div>
+  <div class="hairstyle">Fulani Braids</div>
+  <div class="hairstyle">Ghana Braids</div>
+  <div class="hairstyle">Crochet Braids</div>
 </div>
 
 <div id="controls">
