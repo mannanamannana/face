@@ -29,36 +29,6 @@ height:100%;
 object-fit:cover;
 }
 
-/* Floating Glass Card */
-#glass-card{
-position:fixed;
-right:30px;
-top:50%;
-transform:translateY(-50%);
-width:260px;
-height:320px;
-padding:20px;
-background:rgba(255,255,255,0.08);
-backdrop-filter:blur(25px);
--webkit-backdrop-filter:blur(25px);
-border:1px solid rgba(255,255,255,0.15);
-border-radius:24px;
-color:#fff;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-gap:20px;
-transition:all .3s ease;
-}
-
-/* Placeholder */
-.placeholder{
-opacity:.5;
-font-size:14px;
-text-align:center;
-}
-
 /* Switch Camera Icon */
 #switch-camera{
 position:fixed;
@@ -75,7 +45,7 @@ align-items:center;
 justify-content:center;
 cursor:pointer;
 transition:.2s;
-z-index:20;
+z-index:30;
 }
 
 #switch-camera:hover{
@@ -88,6 +58,21 @@ height:22px;
 stroke:#fff;
 stroke-width:2;
 fill:none;
+}
+
+/* 🖤 Vertical Glass Rail */
+#glass-rail{
+position:fixed;
+top:95px;              /* Below switch icon */
+right:25px;
+width:70px;            /* Slim width */
+height:60vh;           /* Vertical length */
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(25px);
+-webkit-backdrop-filter:blur(25px);
+border:1px solid rgba(255,255,255,0.15);
+border-radius:40px;
+z-index:20;
 }
 
 /* Capture Button */
@@ -105,7 +90,7 @@ align-items:center;
 justify-content:center;
 cursor:pointer;
 transition:.15s;
-z-index:20;
+z-index:30;
 }
 
 #capture:active{
@@ -119,21 +104,15 @@ border-radius:50%;
 border:4px solid #000;
 }
 
-/* 📱 MOBILE REFINEMENT */
+/* 📱 Mobile Refinement */
 @media(max-width:768px){
 
-#glass-card{
-top:95px;               /* Below switch icon */
-right:20px;
-transform:none;
-width:170px;            /* Slim */
-height:auto;
-padding:14px;
-border-radius:18px;
-}
-
-.placeholder{
-font-size:12px;
+#glass-rail{
+right:18px;
+top:90px;
+width:60px;
+height:55vh;
+border-radius:35px;
 }
 
 #capture{
@@ -148,12 +127,6 @@ bottom:30px;
 
 <video id="video" autoplay playsinline muted></video>
 
-<div id="glass-card">
-<div class="placeholder">
-Hairstyles will appear here
-</div>
-</div>
-
 <div id="switch-camera">
 <svg viewBox="0 0 24 24">
 <path d="M3 12a9 9 0 0 1 15-6"/>
@@ -162,6 +135,8 @@ Hairstyles will appear here
 <polyline points="21 21 21 15 15 15"/>
 </svg>
 </div>
+
+<div id="glass-rail"></div>
 
 <div id="capture">
 <div id="capture-inner"></div>
