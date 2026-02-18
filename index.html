@@ -27,13 +27,13 @@ video{
   width:100%;
   height:100%;
   object-fit:cover;
-  transform: scaleX(1); /* non-mirrored camera feed */
+  /* Mirroring handled dynamically via JS */
 }
 
 /* 🔥 Premium Peel Above Buttons */
 #peel{
   position:fixed;
-  bottom:140px; /* slightly higher now */
+  bottom:140px; /* slightly higher */
   left:50%;
   transform:translateX(-50%);
   width:80%;
@@ -245,8 +245,8 @@ async function startCamera(){
     video.srcObject = stream;
     currentStream = stream;
 
-    // Non-mirrored feed
-    video.style.transform = "scaleX(1)";
+    // 🔹 Mirrored front camera for intuitive movement
+    video.style.transform = usingFrontCamera ? "scaleX(-1)" : "scaleX(1)";
 
   }catch(err){
     alert("Camera access denied or unavailable.");
