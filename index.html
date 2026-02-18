@@ -52,6 +52,16 @@ video{
   padding:0 20px;
   gap:15px;
   overflow-x:auto;
+  overflow-y:hidden; /* hide vertical overflow */
+}
+
+/* Hide scrollbar but keep scroll functionality */
+#peel::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+#peel {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 /* Hover / Press effect */
