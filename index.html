@@ -29,20 +29,16 @@ height:100%;
 object-fit:cover;
 }
 
-/* 🔥 Premium Bottom Glass */
+/* 🔥 Bottom Glass Morph */
 #bottom-glass{
 position:fixed;
 bottom:0;
 left:0;
 width:100%;
-height:28vh; /* Reduced size */
+height:28vh;
 pointer-events:none;
-
-/* Deep blur */
 backdrop-filter:blur(45px);
 -webkit-backdrop-filter:blur(45px);
-
-/* Smooth fade upward */
 background:linear-gradient(
 to top,
 rgba(0,0,0,0.85) 0%,
@@ -54,7 +50,7 @@ transparent 100%
 );
 }
 
-/* Controls */
+/* Controls Container */
 #controls{
 position:fixed;
 bottom:35px;
@@ -62,12 +58,14 @@ left:50%;
 transform:translateX(-50%);
 display:flex;
 align-items:center;
-gap:35px;
+justify-content:space-between;
+width:90%; /* spread controls */
+max-width:600px;
 z-index:20;
 }
 
-/* Record Button */
-#record{
+/* Generic Button Style */
+.button{
 width:60px;
 height:60px;
 border-radius:50%;
@@ -81,10 +79,20 @@ cursor:pointer;
 transition:.2s;
 }
 
-#record:active{
+.button:active{
 transform:scale(0.9);
 }
 
+/* Upload & Share Icons */
+.button svg{
+width:28px;
+height:28px;
+stroke:#fff;
+stroke-width:2;
+fill:none;
+}
+
+/* Record */
 #record-dot{
 width:20px;
 height:20px;
@@ -115,33 +123,6 @@ height:65px;
 border-radius:50%;
 border:4px solid #000;
 }
-
-/* Switch Camera */
-#switch-camera{
-width:60px;
-height:60px;
-border-radius:50%;
-background:rgba(255,255,255,0.15);
-backdrop-filter:blur(15px);
-border:1px solid rgba(255,255,255,0.35);
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-transition:.2s;
-}
-
-#switch-camera:active{
-transform:scale(0.9);
-}
-
-#switch-camera svg{
-width:24px;
-height:24px;
-stroke:#fff;
-stroke-width:2;
-fill:none;
-}
 </style>
 </head>
 
@@ -153,20 +134,41 @@ fill:none;
 
 <div id="controls">
 
-<div id="record">
+<!-- Upload -->
+<div id="upload" class="button">
+<svg viewBox="0 0 24 24">
+<path d="M12 16V4"/>
+<path d="M5 11l7-7 7 7"/>
+<path d="M5 20h14"/>
+</svg>
+</div>
+
+<!-- Record -->
+<div id="record" class="button">
 <div id="record-dot"></div>
 </div>
 
+<!-- Shutter -->
 <div id="capture">
 <div id="capture-inner"></div>
 </div>
 
-<div id="switch-camera">
+<!-- Switch Camera -->
+<div id="switch-camera" class="button">
 <svg viewBox="0 0 24 24">
 <path d="M3 12a9 9 0 0 1 15-6"/>
 <path d="M21 12a9 9 0 0 1-15 6"/>
 <polyline points="3 3 3 9 9 9"/>
 <polyline points="21 21 21 15 15 15"/>
+</svg>
+</div>
+
+<!-- Share -->
+<div id="share" class="button">
+<svg viewBox="0 0 24 24">
+<path d="M4 12v-4a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v4"/>
+<path d="M16 8l-4 4-4-4"/>
+<path d="M12 16v4"/>
 </svg>
 </div>
 
@@ -221,9 +223,19 @@ link.href = canvas.toDataURL();
 link.click();
 });
 
-/* Record Placeholder (future expansion) */
+/* Record Placeholder */
 document.getElementById("record").addEventListener("click",()=>{
 alert("Video recording coming next.");
+});
+
+/* Upload Placeholder */
+document.getElementById("upload").addEventListener("click",()=>{
+alert("Upload functionality coming soon.");
+});
+
+/* Share Placeholder */
+document.getElementById("share").addEventListener("click",()=>{
+alert("Share functionality coming soon.");
 });
 </script>
 
