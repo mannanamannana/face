@@ -1,164 +1,222 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AR Hair Engine</title>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AR Hair Beast</title>
+<script src="https://unpkg.com/@vladmandic/face-api/dist/face-api.js"></script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#000;color:#fff;overflow:hidden}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{background:#000;color:#fff;overflow:hidden;display:flex;height:100vh}
+#container{position:relative;flex:1;display:flex;justify-content:center;align-items:center}
+video,canvas{position:absolute;width:100%;height:100%;object-fit:cover}
+#video{display:none}
 
-/* UI Layer */
-#ui{
+/* Sidebar */
+#panel{
 position:absolute;
-top:0;
 right:0;
-width:320px;
+top:0;
+width:300px;
 height:100%;
 background:#111;
 border-left:1px solid #222;
+transform:translateX(100%);
+transition:0.4s;
 padding:20px;
 overflow-y:auto;
 z-index:10;
 }
+#panel.open{transform:translateX(0)}
+
+#toggle{
+position:absolute;
+right:15px;
+top:15px;
+background:#fff;
+color:#000;
+border:none;
+padding:8px 14px;
+cursor:pointer;
+z-index:11;
+}
 
 h2{margin-bottom:15px}
-.product{
+
+.hairstyle{
+display:flex;
+align-items:center;
+gap:10px;
 background:#1a1a1a;
-border:1px solid #222;
-padding:12px;
+padding:10px;
 margin-bottom:10px;
 cursor:pointer;
-transition:.3s;
+border:1px solid #222;
+transition:0.3s;
 }
-.product:hover{background:#333}
+.hairstyle:hover{background:#333}
+.hairstyle img{width:60px}
 
-button{
+.control-group{margin:15px 0}
+input[type=range]{width:100%}
+input[type=color]{width:100%;height:40px;border:none}
+
+#capture{
 width:100%;
-padding:12px;
-margin-top:15px;
+padding:10px;
 background:#fff;
 color:#000;
 border:none;
 cursor:pointer;
+margin-top:15px;
 }
-canvas{display:block}
 </style>
 </head>
 
 <body>
 
-<video id="video" style="display:none"></video>
-<div id="ui">
-<h2>Marketplace</h2>
+<div id="container">
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas"></canvas>
+</div>
 
-<div class="product" data-model="hair1.glb">Classic Braids</div>
-<div class="product" data-model="hair2.glb">Afro Volume</div>
-<div class="product" data-model="hair3.glb">Modern Dreads</div>
+<button id="toggle">MENU</button>
 
-<button id="capture">Capture</button>
+<div id="panel">
+<h2>Choose Style</h2>
+
+<div class="hairstyle" data-url="https://i.imgur.com/8Km9tLL.png">
+<img src="https://i.imgur.com/8Km9tLL.png"> Braids
+</div>
+
+<div class="hairstyle" data-url="https://i.imgur.com/jNNT4LE.png">
+<img src="https://i.imgur.com/jNNT4LE.png"> Afro
+</div>
+
+<div class="hairstyle" data-url="https://i.imgur.com/o5uMfKo.png">
+<img src="https://i.imgur.com/o5uMfKo.png"> Dreads
+</div>
+
+<h2>Adjust</h2>
+
+<div class="control-group">
+<label>Color</label>
+<input type="color" id="colorPicker" value="#ffffff">
+</div>
+
+<div class="control-group">
+<label>Opacity</label>
+<input type="range" id="opacity" min="0" max="1" step="0.01" value="1">
+</div>
+
+<button id="capture">Capture & Download</button>
+
 </div>
 
 <script>
-const video = document.getElementById('video');
+const video=document.getElementById('video');
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({alpha:true, antialias:true});
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+let hairImage=new Image();
+let currentHair=null;
+let lastDetection=null;
 
-camera.position.z = 5;
+let smooth={x:0,y:0,width:0,height:0,angle:0};
 
-const light = new THREE.DirectionalLight(0xffffff,1);
-light.position.set(0,1,2);
-scene.add(light);
-
-let hairMesh = new THREE.Mesh(
-  new THREE.SphereGeometry(1.2,32,32),
-  new THREE.MeshStandardMaterial({color:0xffffff})
-);
-scene.add(hairMesh);
-
-const occlusionMaterial = new THREE.MeshBasicMaterial({
-  color:0x000000,
-  depthWrite:true,
-  colorWrite:false
-});
-
-const occlusionMesh = new THREE.Mesh(
-  new THREE.SphereGeometry(1,32,32),
-  occlusionMaterial
-);
-scene.add(occlusionMesh);
-
-const faceMesh = new FaceMesh({
-  locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
-});
-
-faceMesh.setOptions({
-  maxNumFaces:1,
-  refineLandmarks:true,
-  minDetectionConfidence:0.7,
-  minTrackingConfidence:0.7
-});
-
-faceMesh.onResults(results=>{
-  if(!results.multiFaceLandmarks.length) return;
-
-  const landmarks = results.multiFaceLandmarks[0];
-
-  const left = landmarks[234];
-  const right = landmarks[454];
-  const top = landmarks[10];
-
-  const width = Math.abs(right.x - left.x);
-  const height = Math.abs(top.y - left.y);
-
-  const centerX = (left.x + right.x)/2 - 0.5;
-  const centerY = -((top.y) - 0.5);
-
-  hairMesh.position.x = centerX*5;
-  hairMesh.position.y = centerY*5 + 1;
-  hairMesh.scale.set(width*6,width*6,width*6);
-
-  occlusionMesh.position.copy(hairMesh.position);
-  occlusionMesh.scale.copy(hairMesh.scale);
-});
-
-const cam = new Camera(video,{
-  onFrame: async ()=>{await faceMesh.send({image:video});},
-  width:640,
-  height:480
-});
-cam.start();
-
-function animate(){
-  requestAnimationFrame(animate);
-  renderer.render(scene,camera);
-}
-animate();
-
-/* Marketplace logic */
-document.querySelectorAll('.product').forEach(el=>{
-  el.onclick=()=>{
-    hairMesh.material.color.set(0xffffff);
-    alert("Model system ready for GLB loader integration.");
-  }
-});
-
-/* Capture */
-document.getElementById("capture").onclick=()=>{
-  const link=document.createElement("a");
-  link.download="capture.png";
-  link.href=renderer.domElement.toDataURL();
-  link.click();
+document.getElementById('toggle').onclick=()=>{
+document.getElementById('panel').classList.toggle('open');
 };
+
+document.querySelectorAll('.hairstyle').forEach(el=>{
+el.onclick=()=>{
+hairImage.src=el.dataset.url;
+currentHair=el.dataset.url;
+};
+});
+
+async function init(){
+
+await faceapi.nets.tinyFaceDetector.loadFromUri('https://unpkg.com/@vladmandic/face-api/model');
+await faceapi.nets.faceLandmark68Net.loadFromUri('https://unpkg.com/@vladmandic/face-api/model');
+
+const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}});
+video.srcObject=stream;
+
+video.onloadedmetadata=()=>{
+canvas.width=video.videoWidth;
+canvas.height=video.videoHeight;
+detect();
+render();
+};
+}
+
+async function detect(){
+lastDetection=await faceapi
+.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions())
+.withFaceLandmarks();
+setTimeout(detect,200);
+}
+
+function render(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.drawImage(video,0,0,canvas.width,canvas.height);
+
+if(lastDetection && hairImage.complete){
+
+const landmarks=lastDetection.landmarks;
+const jaw=landmarks.getJawOutline();
+const left=jaw[0];
+const right=jaw[16];
+
+const faceWidth=Math.hypot(right.x-left.x,right.y-left.y);
+const centerX=(left.x+right.x)/2;
+const brow=landmarks.getLeftEyeBrow()[2];
+
+const angle=Math.atan2(right.y-left.y,right.x-left.x);
+
+const target={
+x:centerX,
+y:brow.y,
+width:faceWidth*1.6,
+height:hairImage.height*(faceWidth*1.6/hairImage.width),
+angle:angle
+};
+
+// smoothing
+for(let key in target){
+smooth[key]+= (target[key]-smooth[key])*0.2;
+}
+
+ctx.save();
+ctx.translate(smooth.x,smooth.y - smooth.height*0.6);
+ctx.rotate(smooth.angle);
+ctx.globalAlpha=document.getElementById('opacity').value;
+
+// color tint
+ctx.drawImage(hairImage,-smooth.width/2,-smooth.height/2,smooth.width,smooth.height);
+ctx.globalCompositeOperation="source-atop";
+ctx.fillStyle=document.getElementById('colorPicker').value;
+ctx.fillRect(-smooth.width/2,-smooth.height/2,smooth.width,smooth.height);
+ctx.globalCompositeOperation="source-over";
+
+ctx.restore();
+}
+
+requestAnimationFrame(render);
+}
+
+document.getElementById('capture').onclick=()=>{
+const link=document.createElement('a');
+link.download="ar-hair.png";
+link.href=canvas.toDataURL();
+link.click();
+};
+
+init();
 </script>
+
 </body>
 </html>
+
