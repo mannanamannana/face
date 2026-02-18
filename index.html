@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Camera Foundation</title>
+<title>Camera System</title>
 
 <style>
 *{
@@ -29,60 +29,44 @@ height:100%;
 object-fit:cover;
 }
 
-/* Switch Camera Icon */
-#switch-camera{
+/* Bottom Glass Morph Layer */
+#bottom-glass{
 position:fixed;
-top:25px;
-right:25px;
-width:50px;
-height:50px;
-border-radius:50%;
-background:rgba(255,255,255,0.15);
-backdrop-filter:blur(15px);
-border:1px solid rgba(255,255,255,0.25);
+bottom:0;
+left:0;
+width:100%;
+height:40vh;
+pointer-events:none;
+background:
+linear-gradient(
+to top,
+rgba(0,0,0,0.7) 0%,
+rgba(0,0,0,0.55) 20%,
+rgba(0,0,0,0.35) 45%,
+rgba(0,0,0,0.15) 70%,
+rgba(0,0,0,0.05) 90%,
+transparent 100%
+);
+backdrop-filter:blur(35px);
+-webkit-backdrop-filter:blur(35px);
+}
+
+/* Control Container */
+#controls{
+position:fixed;
+bottom:35px;
+left:50%;
+transform:translateX(-50%);
 display:flex;
 align-items:center;
-justify-content:center;
-cursor:pointer;
-transition:.2s;
-z-index:30;
-}
-
-#switch-camera:hover{
-transform:scale(1.08);
-}
-
-#switch-camera svg{
-width:22px;
-height:22px;
-stroke:#fff;
-stroke-width:2;
-fill:none;
-}
-
-/* 🖤 Vertical Glass Rail */
-#glass-rail{
-position:fixed;
-top:95px;              /* Below switch icon */
-right:25px;
-width:70px;            /* Slim width */
-height:60vh;           /* Vertical length */
-background:rgba(255,255,255,0.08);
-backdrop-filter:blur(25px);
--webkit-backdrop-filter:blur(25px);
-border:1px solid rgba(255,255,255,0.15);
-border-radius:40px;
+gap:35px;
 z-index:20;
 }
 
-/* Capture Button */
+/* Shutter */
 #capture{
-position:fixed;
-bottom:40px;
-left:50%;
-transform:translateX(-50%);
-width:80px;
-height:80px;
+width:85px;
+height:85px;
 border-radius:50%;
 background:#fff;
 display:flex;
@@ -90,42 +74,75 @@ align-items:center;
 justify-content:center;
 cursor:pointer;
 transition:.15s;
-z-index:30;
 }
 
 #capture:active{
-transform:translateX(-50%) scale(0.9);
+transform:scale(0.9);
 }
 
 #capture-inner{
-width:60px;
-height:60px;
+width:65px;
+height:65px;
 border-radius:50%;
 border:4px solid #000;
 }
 
-/* 📱 Mobile Refinement */
-@media(max-width:768px){
-
-#glass-rail{
-right:18px;
-top:90px;
+/* Switch Camera */
+#switch-camera{
 width:60px;
-height:55vh;
-border-radius:35px;
+height:60px;
+border-radius:50%;
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(15px);
+border:1px solid rgba(255,255,255,0.3);
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+transition:.2s;
 }
 
-#capture{
-bottom:30px;
+#switch-camera:active{
+transform:scale(0.9);
 }
 
+#switch-camera svg{
+width:24px;
+height:24px;
+stroke:#fff;
+stroke-width:2;
+fill:none;
 }
+
+/* Hairstyle Area (Future Use) */
+#hairstyles{
+position:fixed;
+bottom:140px;
+left:0;
+width:100%;
+height:120px;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:15;
+}
+
+/* Placeholder invisible for now */
 </style>
 </head>
 
 <body>
 
 <video id="video" autoplay playsinline muted></video>
+
+<div id="bottom-glass"></div>
+
+<div id="hairstyles"></div>
+
+<div id="controls">
+<div id="capture">
+<div id="capture-inner"></div>
+</div>
 
 <div id="switch-camera">
 <svg viewBox="0 0 24 24">
@@ -135,11 +152,6 @@ bottom:30px;
 <polyline points="21 21 21 15 15 15"/>
 </svg>
 </div>
-
-<div id="glass-rail"></div>
-
-<div id="capture">
-<div id="capture-inner"></div>
 </div>
 
 <script>
@@ -147,9 +159,7 @@ const video = document.getElementById("video");
 let currentStream;
 let usingFrontCamera = true;
 
-/* Start Camera */
 async function startCamera(){
-
 if(currentStream){
 currentStream.getTracks().forEach(track=>track.stop());
 }
