@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hair Camera App</title>
+    <style>
+        body { margin: 0; padding: 0; display: flex; background: #f0f0f0; font-family: Arial, sans-serif; }
+        #container { position: relative; width: 640px; height: 480px; }
+        #video { display: none; }
+        #canvas { position: absolute; top: 0; left: 0; }
+        #sidebar { width: 200px; padding: 10px; background: #fff; border-left: 1px solid #ddd; overflow-y: auto; }
+        #sidebar h2 { text-align: center; }
+        .hairstyle-btn { display: block; width: 100%; margin: 10px 0; padding: 10px; background: #eee; border: none; cursor: pointer; text-align: left; }
+        .hairstyle-btn img { width: 50px; height: auto; margin-right: 10px; vertical-align: middle; }
+        .hairstyle-btn:hover { background: #ddd; }
+    </style>
+    <script src="https://unpkg.com/@vladmandic/face-api/dist/face-api.js"></script>
+</head>
+<body>
+    <div id="container">
+        <video id="video" width="640" height="480" autoplay playsinline></video>
+        <canvas id="canvas" width="640" height="480"></canvas>
+    </div>
+    <div id="sidebar">
+        <h2>Select Hairstyle</h2>
+        <button class="hairstyle-btn" data-url="https://i0.wp.com/www.perfektionhair.com/wp-content/uploads/2024/04/Blog-post-Pictures-1.png"><img src="https://i0.wp.com/www.perfektionhair.com/wp-content/uploads/2024/04/Blog-post-Pictures-1.png" alt="Box Braids">Box Braids</button>
+        <button class="hairstyle-btn" data-url="https://i.etsystatic.com/23118837/r/il/3458de/5107109594/il_fullxfull.5107109594_bn45.jpg"><img src="https://i.etsystatic.com/23118837/r/il/3458de/5107109594/il_fullxfull.5107109594_bn45.jpg" alt="Cornrows">Cornrows</button>
+        <button class="hairstyle-btn" data-url="https://i.etsystatic.com/22767222/r/il/feaeec/4559700222/il_fullxfull.4559700222_dql9.jpg"><img src="https://i.etsystatic.com/22767222/r/il/feaeec/4559700222/il_fullxfull.4559700222_dql9.jpg" alt="Afro Puff">Afro Puff</button>
+        <button class="hairstyle-btn" data-url="https://i.etsystatic.com/35753773/r/il/810854/4030104587/il_1080xN.4030104587_55f4.jpg"><img src="https://i.etsystatic.com/35753773/r/il/810854/4030104587/il_1080xN.4030104587_55f4.jpg" alt="Dreadlocks">Dreadlocks</button>
+        <button class="hairstyle-btn" data-url="https://i.etsystatic.com/43480295/r/il/6917df/5026581441/il_fullxfull.5026581441_i0oa.jpg"><img src="https://i.etsystatic.com/43480295/r/il/6917df/5026581441/il_fullxfull.5026581441_i0oa.jpg" alt="Bantu Knots">Bantu Knots</button>
+        <button class="hairstyle-btn" data-url="https://i.etsystatic.com/12155114/r/il/877b20/3994991966/il_fullxfull.3994991966_82sc.jpg"><img src="https://i.etsystatic.com/12155114/r/il/877b20/3994991966/il_fullxfull.3994991966_82sc.jpg" alt="Senegalese Twists">Senegalese Twists</button>
+        <button class="hairstyle-btn" data-url="https://beautyinabind.com/wp-content/uploads/2025/07/addtext_07-08-07.50.31.jpg"><img src="https://beautyinabind.com/wp-content/uploads/2025/07/addtext_07-08-07.50.31.jpg" alt="Fulani Braids">Fulani Braids</button>
+        <button class="hairstyle-btn" data-url="https://i.etsystatic.com/12155114/r/il/877b20/3994991966/il_fullxfull.3994991966_82sc.jpg"><img src="https://i.etsystatic.com/12155114/r/il/877b20/3994991966/il_fullxfull.3994991966_82sc.jpg" alt="Ghana Braids">Ghana Braids</button>
+        <button class="hairstyle-btn" data-url="http://designsbyaymara.com/cdn/shop/products/DesignsbyAymaraHERMOSAS32haironlycopy-01_1200x1200.jpg"><img src="http://designsbyaymara.com/cdn/shop/products/DesignsbyAymaraHERMOSAS32haironlycopy-01_1200x1200.jpg" alt="Crochet Braids">Crochet Braids</button>
+        <button class="hairstyle-btn" data-url="https://apohair.com/wp-content/uploads/2024/04/short-kinky-twists.webp"><img src="https://apohair.com/wp-content/uploads/2024/04/short-kinky-twists.webp" alt="Kinky Twists">Kinky Twists</button>
+    </div>
+    <script>
+        let currentHairUrl = null;
+        let hairImage = new Image();
+
+        async function startApp() {
+            // Load face-api models
+            await faceapi.nets.tinyFaceDetector.loadFromUri('https://unpkg.com/@vladmandic/face-api/model');
+            await faceapi.nets.faceLandmark68Net.loadFromUri('https://unpkg.com/@vladmandic/face-api/model');
+
+            // Get camera access
+            const video = document.getElementById('video');
+            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                video.srcObject = stream;
+                video.play();
+            });
+
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Sidebar buttons
+            document.querySelectorAll('.hairstyle-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentHairUrl = btn.dataset.url;
+                    hairImage.src = currentHairUrl;
+                });
+            });
+
+            // Render loop
+            video.addEventListener('play', () => {
+                setInterval(async () => {
+                    ctx.drawImage(video, 0, 0, 640, 480);
+                    if (currentHairUrl) {
+                        const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
+                        if (detection) {
+                            const box = detection.detection.box;
+                            const faceWidth = box.width;
+                            const faceHeight = box.height;
+                            const hairWidth = faceWidth * 1.2; // Scale hair slightly larger than face
+                            const hairHeight = hairImage.height * (hairWidth / hairImage.width);
+                            const hairX = box.x - (hairWidth - faceWidth) / 2;
+                            const hairY = box.y - hairHeight * 0.6; // Position above forehead
+                            ctx.drawImage(hairImage, hairX, hairY, hairWidth, hairHeight);
+                        }
+                    }
+                }, 50);
+            });
+        }
+
+        startApp();
+    </script>
+</body>
+</html>
