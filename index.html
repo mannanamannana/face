@@ -7,7 +7,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
 body{background:#000;overflow:hidden;height:100vh;}
-video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;}
+video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:filter 0.4s ease;}
 #peel{position:fixed;bottom:140px;left:50%;transform:translateX(-50%);width:80%;max-width:700px;height:90px;border-radius:50px;background:rgba(0,0,0,0.25);backdrop-filter:blur(35px);-webkit-backdrop-filter:blur(35px);border:1px solid rgba(255,255,255,0.15);transition:all 0.3s ease;z-index:10;box-shadow:0 10px 25px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:flex-start;padding:0 20px;gap:15px;overflow-x:auto;overflow-y:hidden;}
 #peel::-webkit-scrollbar{display:none;}
 #peel{-ms-overflow-style:none;scrollbar-width:none;}
@@ -23,39 +23,33 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;}
 #capture:active{transform:scale(0.9);}
 #capture-inner{width:65px;height:65px;border-radius:50%;border:4px solid #000;}
 
-/* Premium Pop-up from Top with Bounce */
+/* Premium Pop-up center fade */
 #premium-popup{
   position:fixed;
-  top:-60px; /* lowered from top */
+  top:50%;
   left:50%;
-  transform:translateX(-50%);
+  transform:translate(-50%, -50%);
   background:rgba(255,255,255,0.1);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
+  backdrop-filter:blur(15px);
+  -webkit-backdrop-filter:blur(15px);
   border:1px solid rgba(255,255,255,0.25);
-  padding:15px 25px;
-  border-radius:25px;
+  padding:12px 22px;
+  border-radius:20px;
   color:#fff;
   font-weight:600;
-  font-size:16px;
+  font-size:15px;
   opacity:0;
   pointer-events:none;
   text-align:center;
-  transition:opacity 0.3s ease, top 0.3s ease;
   z-index:30;
+  transition:opacity 0.5s ease, transform 0.5s ease;
+  max-width:80%;
 }
 
-/* Bounce animation */
-@keyframes slideBounce {
-  0% { top:-60px; }
-  60% { top:45px; }
-  80% { top:35px; }
-  100% { top:40px; }
-}
-
+/* Show popup with fade & slight scale */
 #premium-popup.show{
   opacity:1;
-  animation: slideBounce 0.5s ease-out;
+  transform:translate(-50%, -50%) scale(1.05);
 }
 </style>
 </head>
@@ -142,11 +136,18 @@ document.getElementById("capture").addEventListener("click",()=>{
   link.click();
 });
 
-/* Premium popup function */
+/* Premium popup function with blur */
 function showPremiumPopup(){
   const popup = document.getElementById("premium-popup");
+  // Blur camera
+  video.style.filter = "blur(6px)";
   popup.classList.add("show");
-  setTimeout(()=>popup.classList.remove("show"),3500); // extended to 3.5s
+  // Keep popup visible for 3.5s
+  setTimeout(()=>{
+    popup.classList.remove("show");
+    // Remove blur
+    video.style.filter = "none";
+  },3500);
 }
 
 /* Replace alerts with premium popup */
