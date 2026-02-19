@@ -267,6 +267,24 @@ function vibrateTap() {
 document.querySelectorAll(".button").forEach(btn=>{
   btn.addEventListener("click", vibrateTap);
 });
+
+/* ===================== Haptic Feedback on Peel Scroll ===================== */
+let lastScrollX = 0;
+let scrollTimeout;
+
+peel.addEventListener("scroll", () => {
+  const currentScroll = peel.scrollLeft;
+
+  if (Math.abs(currentScroll - lastScrollX) > 30) { // adjust step sensitivity
+    if (navigator.vibrate) navigator.vibrate(10); // subtle pulse
+    lastScrollX = currentScroll;
+  }
+
+  clearTimeout(scrollTimeout);
+  scrollTimeout = setTimeout(() => {
+    lastScrollX = peel.scrollLeft;
+  }, 50);
+});
 </script>
 
 </body>
