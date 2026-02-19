@@ -8,28 +8,96 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
 body{background:#000;overflow:hidden;height:100vh;}
 video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:filter 0.4s ease;}
-#peel{position:fixed;bottom:140px;left:50%;transform:translateX(-50%);width:80%;max-width:700px;height:90px;border-radius:50px;background:rgba(0,0,0,0.35);backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);border:1px solid rgba(255,255,255,0.1);transition:all 0.3s ease;z-index:10;box-shadow:0 10px 25px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:flex-start;padding:0 20px;gap:15px;overflow-x:auto;overflow-y:hidden;}
+
+/* Black Glass Morph Peel */
+#peel{
+  position:fixed;
+  bottom:140px;
+  left:50%;
+  transform:translateX(-50%);
+  width:80%;
+  max-width:700px;
+  height:90px;
+  border-radius:50px;
+  background:rgba(0,0,0,0.5);
+  backdrop-filter:blur(25px);
+  -webkit-backdrop-filter:blur(25px);
+  border:1px solid rgba(255,255,255,0.1);
+  transition:all 0.3s ease;
+  z-index:10;
+  box-shadow:0 10px 25px rgba(0,0,0,0.5);
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  padding:0 20px;
+  gap:15px;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
 #peel::-webkit-scrollbar{display:none;}
 #peel{-ms-overflow-style:none;scrollbar-width:none;}
-#peel:hover,#peel.active{transform:translateX(-50%) scale(1.05);background:rgba(0,0,0,0.5);}
-.hairstyle{min-width:120px;height:70px;border-radius:20px;background:rgba(0,0,0,0.25);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform 0.4s ease, opacity 0.4s ease;font-size:14px;font-weight:600;color:#fff;text-transform:capitalize;opacity:0;}
+#peel:hover,#peel.active{transform:translateX(-50%) scale(1.05);background:rgba(0,0,0,0.6);}
+
+.hairstyle{
+  min-width:120px;
+  height:70px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.05);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:transform 0.4s ease, opacity 0.4s ease;
+  font-size:14px;
+  font-weight:600;
+  color:#fff;
+  text-transform:capitalize;
+  opacity:0;
+}
 .hairstyle.show{opacity:1;transform:translateY(0);}
-#controls{position:fixed;bottom:35px;left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:space-between;width:90%;max-width:600px;z-index:20;}
-.button{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;}
+
+/* Controls - Black Glass Morph */
+#controls{
+  position:fixed;
+  bottom:35px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:90%;
+  max-width:600px;
+  z-index:20;
+}
+.button{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:rgba(0,0,0,0.5);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:.2s;
+}
 .button:active{transform:scale(0.9);}
-.button svg{width:28px;height:28px;stroke:#fff;stroke-width:2;fill:none;}
+.button svg{width:28px;height:28px;stroke:#fff;stroke-width:2;fill:none;transition:all 0.4s ease;}
+
 #record-dot{width:20px;height:20px;border-radius:50%;background:#fff;}
 #capture{width:85px;height:85px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;}
 #capture:active{transform:scale(0.9);}
 #capture-inner{width:65px;height:65px;border-radius:50%;border:4px solid #000;}
 
-/* Premium Pop-up center fade */
+/* Premium Pop-up Black Glass Morph */
 #premium-popup{
   position:fixed;
   top:50%;
   left:50%;
   transform:translate(-50%, -50%);
-  background:rgba(0,0,0,0.45);
+  background:rgba(0,0,0,0.6);
   backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px);
   border:1px solid rgba(255,255,255,0.15);
@@ -48,18 +116,6 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;transi
 #premium-popup.show{
   opacity:1;
   transform:translate(-50%, -50%) scale(1.05);
-}
-
-/* Share button black glass override */
-#share{
-  background:rgba(0,0,0,0.35);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  font-size:28px;
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
 }
 </style>
 </head>
@@ -144,6 +200,7 @@ function showPremiumPopup(){
 document.getElementById("record").addEventListener("click",showPremiumPopup);
 document.getElementById("upload").addEventListener("click",showPremiumPopup);
 
+/* Peel hover/press */
 const peel = document.getElementById("peel");
 peel.addEventListener("mousedown",()=>peel.classList.add("active"));
 peel.addEventListener("mouseup",()=>peel.classList.remove("active"));
@@ -151,5 +208,46 @@ peel.addEventListener("mouseleave",()=>peel.classList.remove("active"));
 
 /* ===================== Gender toggle Share button ===================== */
 let isMale = true;
+
 const maleStyles = ["Buzz Cut","Crew Cut","Fade","Pompadour","Undercut","Dreadlocks","Cornrows","Afro"];
-const femaleStyles = ["Box Braids","Cornrows","Afro Puff","Dreadlocks","Bantu Kn]()
+const femaleStyles = ["Box Braids","Cornrows","Afro Puff","Dreadlocks","Bantu Knots","Senegalese Twists","Fulani Braids","Crochet Braids"];
+
+function updatePeelStyles(){
+  peel.innerHTML = "";
+  const styles = isMale ? maleStyles : femaleStyles;
+  styles.forEach((style, index) => {
+    const div = document.createElement("div");
+    div.className = "hairstyle";
+    div.textContent = style;
+    peel.appendChild(div);
+    setTimeout(()=>div.classList.add("show"), index * 100);
+  });
+}
+
+// Initialize peel
+updatePeelStyles();
+
+// Replace icon with text symbols
+function createGenderIcon(){
+  const span = document.createElement("span");
+  span.style.fontSize = "24px";
+  span.style.transition = "all 0.4s ease";
+  span.textContent = isMale ? "🜲" : "♛";
+  return span;
+}
+
+// Initialize share button
+const shareBtn = document.getElementById("share");
+shareBtn.appendChild(createGenderIcon());
+
+shareBtn.addEventListener("click",()=>{
+  isMale = !isMale;
+  updatePeelStyles();
+  const oldIcon = shareBtn.querySelector("span");
+  if(oldIcon) shareBtn.removeChild(oldIcon);
+  shareBtn.appendChild(createGenderIcon());
+});
+</script>
+
+</body>
+</html>
