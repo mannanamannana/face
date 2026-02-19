@@ -9,6 +9,12 @@
 body{background:#000;overflow:hidden;height:100vh;}
 video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:filter 0.4s ease;}
 
+/* Remove blue tap highlight on mobile */
+.button, div, a {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
 /* Black Glass Morph Peel with glow */
 #peel{
   position: fixed;
@@ -123,7 +129,7 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;transi
 
 /* Share icon plain white */
 #share span {
-  color: #fff; /* plain white */
+  color: #fff;
   font-size: 26px;
   transition: all 0.3s ease;
 }
