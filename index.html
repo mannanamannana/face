@@ -22,10 +22,11 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;}
 #capture{width:85px;height:85px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;}
 #capture:active{transform:scale(0.9);}
 #capture-inner{width:65px;height:65px;border-radius:50%;border:4px solid #000;}
-/* Premium Pop-up from Top */
+
+/* Premium Pop-up from Top with Bounce */
 #premium-popup{
   position:fixed;
-  top:-80px; /* hidden initially above top */
+  top:-80px;
   left:50%;
   transform:translateX(-50%);
   background:rgba(255,255,255,0.1);
@@ -43,9 +44,18 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;}
   transition:opacity 0.3s ease, top 0.3s ease;
   z-index:30;
 }
+
+/* Bounce animation */
+@keyframes slideBounce {
+  0% { top:-80px; }
+  60% { top:25px; }
+  80% { top:15px; }
+  100% { top:20px; }
+}
+
 #premium-popup.show{
-  top:20px; /* slide down */
   opacity:1;
+  animation: slideBounce 0.5s ease-out;
 }
 </style>
 </head>
@@ -122,6 +132,7 @@ document.getElementById("switch-camera").addEventListener("click",()=>{
   usingFrontCamera = !usingFrontCamera;
   startCamera();
 });
+
 document.getElementById("capture").addEventListener("click",()=>{
   const canvas = document.createElement("canvas");
   canvas.width = video.videoWidth;
