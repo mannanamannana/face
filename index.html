@@ -17,7 +17,7 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;transi
 #controls{position:fixed;bottom:35px;left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:space-between;width:90%;max-width:600px;z-index:20;}
 .button{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;}
 .button:active{transform:scale(0.9);}
-.button svg{width:28px;height:28px;stroke:#fff;stroke-width:2;fill:none;}
+.button svg{width:28px;height:28px;stroke:#fff;stroke-width:2;fill:none;transition:all 0.4s ease;}
 #record-dot{width:20px;height:20px;border-radius:50%;background:#fff;}
 #capture{width:85px;height:85px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;}
 #capture:active{transform:scale(0.9);}
@@ -57,17 +57,7 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;transi
 
 <video id="video" autoplay playsinline muted></video>
 
-<div id="peel">
-  <div class="hairstyle">Box Braids</div>
-  <div class="hairstyle">Cornrows</div>
-  <div class="hairstyle">Afro Puff</div>
-  <div class="hairstyle">Dreadlocks</div>
-  <div class="hairstyle">Bantu Knots</div>
-  <div class="hairstyle">Senegalese Twists</div>
-  <div class="hairstyle">Fulani Braids</div>
-  <div class="hairstyle">Ghana Braids</div>
-  <div class="hairstyle">Crochet Braids</div>
-</div>
+<div id="peel"></div>
 
 <div id="controls">
   <div id="upload" class="button">
@@ -95,13 +85,7 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;transi
     </svg>
   </div>
 
-  <div id="share" class="button">
-    <svg viewBox="0 0 24 24">
-      <path d="M4 12v-4a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v4"/>
-      <path d="M16 8l-4 4-4-4"/>
-      <path d="M12 16v4"/>
-    </svg>
-  </div>
+  <div id="share" class="button"></div>
 </div>
 
 <div id="premium-popup">This feature is only available to Premium users</div>
@@ -139,13 +123,10 @@ document.getElementById("capture").addEventListener("click",()=>{
 /* Premium popup function with blur */
 function showPremiumPopup(){
   const popup = document.getElementById("premium-popup");
-  // Blur camera
   video.style.filter = "blur(6px)";
   popup.classList.add("show");
-  // Keep popup visible for 3.5s
   setTimeout(()=>{
     popup.classList.remove("show");
-    // Remove blur
     video.style.filter = "none";
   },3500);
 }
@@ -153,13 +134,70 @@ function showPremiumPopup(){
 /* Replace alerts with premium popup */
 document.getElementById("record").addEventListener("click",showPremiumPopup);
 document.getElementById("upload").addEventListener("click",showPremiumPopup);
-document.getElementById("share").addEventListener("click",showPremiumPopup);
 
 /* Peel hover/press */
 const peel = document.getElementById("peel");
 peel.addEventListener("mousedown",()=>peel.classList.add("active"));
 peel.addEventListener("mouseup",()=>peel.classList.remove("active"));
 peel.addEventListener("mouseleave",()=>peel.classList.remove("active"));
+
+/* ===================== Gender toggle Share button ===================== */
+let isMale = true;
+
+// Define hairstyle lists for each gender
+const maleStyles = ["Buzz Cut","Crew Cut","Fade","Pompadour","Undercut","Dreadlocks","Cornrows","Afro"];
+const femaleStyles = ["Box Braids","Cornrows","Afro Puff","Dreadlocks","Bantu Knots","Senegalese Twists","Fulani Braids","Crochet Braids"];
+
+// Function to update the peel list
+function updatePeelStyles(){
+  peel.innerHTML = "";
+  const styles = isMale ? maleStyles : femaleStyles;
+  styles.forEach(style => {
+    const div = document.createElement("div");
+    div.className = "hairstyle";
+    div.textContent = style;
+    peel.appendChild(div);
+  });
+}
+
+// Initialize peel styles
+updatePeelStyles();
+
+// Function to create SVG icon
+function createShareIcon(){
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS,"svg");
+  svg.setAttribute("viewBox","0 0 24 24");
+  svg.setAttribute("width","24");
+  svg.setAttribute("height","24");
+  svg.setAttribute("stroke","#fff");
+  svg.setAttribute("fill","none");
+  svg.setAttribute("stroke-width","2");
+  svg.style.transition = "all 0.4s ease";
+
+  if(isMale){
+    // Male icon (arrow)
+    svg.innerHTML = `<path d="M12 16V4"/><path d="M5 11l7-7 7 7"/><path d="M5 20h14"/>`;
+  } else {
+    // Female icon (heart)
+    svg.innerHTML = `<path d="M12 21C12 21 5 14 5 9a5 5 0 0 1 10 0c0 5-7 12-7 12z"/>`;
+  }
+  return svg;
+}
+
+// Initialize share button
+const shareBtn = document.getElementById("share");
+shareBtn.appendChild(createShareIcon());
+
+// On click toggle gender and icon
+shareBtn.addEventListener("click",()=>{
+  isMale = !isMale;
+  updatePeelStyles();
+  // Animate icon change
+  const oldIcon = shareBtn.querySelector("svg");
+  if(oldIcon) shareBtn.removeChild(oldIcon);
+  shareBtn.appendChild(createShareIcon());
+});
 </script>
 
 </body>
