@@ -26,7 +26,7 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;}
 /* Premium Pop-up from Top with Bounce */
 #premium-popup{
   position:fixed;
-  top:-80px;
+  top:-60px; /* lowered from top */
   left:50%;
   transform:translateX(-50%);
   background:rgba(255,255,255,0.1);
@@ -40,17 +40,17 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;}
   font-size:16px;
   opacity:0;
   pointer-events:none;
-  text-align:center; /* center text for mobile */
+  text-align:center;
   transition:opacity 0.3s ease, top 0.3s ease;
   z-index:30;
 }
 
 /* Bounce animation */
 @keyframes slideBounce {
-  0% { top:-80px; }
-  60% { top:25px; }
-  80% { top:15px; }
-  100% { top:20px; }
+  0% { top:-60px; }
+  60% { top:45px; }
+  80% { top:35px; }
+  100% { top:40px; }
 }
 
 #premium-popup.show{
@@ -128,10 +128,7 @@ async function startCamera(){
 }
 startCamera();
 
-document.getElementById("switch-camera").addEventListener("click",()=>{
-  usingFrontCamera = !usingFrontCamera;
-  startCamera();
-});
+document.getElementById("switch-camera").addEventListener("click",()=>{ usingFrontCamera = !usingFrontCamera; startCamera(); });
 
 document.getElementById("capture").addEventListener("click",()=>{
   const canvas = document.createElement("canvas");
@@ -149,7 +146,7 @@ document.getElementById("capture").addEventListener("click",()=>{
 function showPremiumPopup(){
   const popup = document.getElementById("premium-popup");
   popup.classList.add("show");
-  setTimeout(()=>popup.classList.remove("show"),2000);
+  setTimeout(()=>popup.classList.remove("show"),3500); // extended to 3.5s
 }
 
 /* Replace alerts with premium popup */
