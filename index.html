@@ -258,6 +258,15 @@ shareBtn.addEventListener("click",()=>{
   if(oldIcon) shareBtn.removeChild(oldIcon);
   shareBtn.appendChild(createGenderIcon());
 });
+
+/* ===================== Subtle Haptic Feedback ===================== */
+function vibrateTap() {
+  if(navigator.vibrate) navigator.vibrate(15); // 15ms subtle vibration
+}
+
+document.querySelectorAll(".button").forEach(btn=>{
+  btn.addEventListener("click", vibrateTap);
+});
 </script>
 
 </body>
