@@ -12,8 +12,8 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;transi
 #peel::-webkit-scrollbar{display:none;}
 #peel{-ms-overflow-style:none;scrollbar-width:none;}
 #peel:hover,#peel.active{transform:translateX(-50%) scale(1.05);background:rgba(0,0,0,0.35);}
-.hairstyle{min-width:120px;height:70px;border-radius:20px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.2s;font-size:14px;font-weight:600;color:#fff;text-transform:capitalize;}
-.hairstyle:hover{transform:scale(1.1);background:rgba(255,255,255,0.2);}
+.hairstyle{min-width:120px;height:70px;border-radius:20px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform 0.4s ease, opacity 0.4s ease;font-size:14px;font-weight:600;color:#fff;text-transform:capitalize;opacity:0;}
+.hairstyle.show{opacity:1;transform:translateY(0);}
 #controls{position:fixed;bottom:35px;left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:space-between;width:90%;max-width:600px;z-index:20;}
 .button{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;}
 .button:active{transform:scale(0.9);}
@@ -45,8 +45,6 @@ video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;transi
   transition:opacity 0.5s ease, transform 0.5s ease;
   max-width:80%;
 }
-
-/* Show popup with fade & slight scale */
 #premium-popup.show{
   opacity:1;
   transform:translate(-50%, -50%) scale(1.05);
@@ -144,27 +142,27 @@ peel.addEventListener("mouseleave",()=>peel.classList.remove("active"));
 /* ===================== Gender toggle Share button ===================== */
 let isMale = true;
 
-// Define hairstyle lists for each gender
 const maleStyles = ["Buzz Cut","Crew Cut","Fade","Pompadour","Undercut","Dreadlocks","Cornrows","Afro"];
 const femaleStyles = ["Box Braids","Cornrows","Afro Puff","Dreadlocks","Bantu Knots","Senegalese Twists","Fulani Braids","Crochet Braids"];
 
-// Function to update the peel list
 function updatePeelStyles(){
   peel.innerHTML = "";
   const styles = isMale ? maleStyles : femaleStyles;
-  styles.forEach(style => {
+  styles.forEach((style, index) => {
     const div = document.createElement("div");
     div.className = "hairstyle";
     div.textContent = style;
     peel.appendChild(div);
+    // Animate appearance
+    setTimeout(()=>div.classList.add("show"), index * 100);
   });
 }
 
-// Initialize peel styles
+// Initialize peel
 updatePeelStyles();
 
-// Function to create SVG icon
-function createShareIcon(){
+// Function to create gender SVG
+function createGenderIcon(){
   const svgNS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(svgNS,"svg");
   svg.setAttribute("viewBox","0 0 24 24");
@@ -176,27 +174,26 @@ function createShareIcon(){
   svg.style.transition = "all 0.4s ease";
 
   if(isMale){
-    // Male icon (arrow)
-    svg.innerHTML = `<path d="M12 16V4"/><path d="M5 11l7-7 7 7"/><path d="M5 20h14"/>`;
+    // Male symbol ♂
+    svg.innerHTML = `<circle cx="12" cy="12" r="5"/><path d="M12 2v4h4"/>`;
   } else {
-    // Female icon (heart)
-    svg.innerHTML = `<path d="M12 21C12 21 5 14 5 9a5 5 0 0 1 10 0c0 5-7 12-7 12z"/>`;
+    // Female symbol ♀
+    svg.innerHTML = `<circle cx="12" cy="8" r="4"/><line x1="12" y1="12" x2="12" y2="22"/><line x1="8" y1="18" x2="16" y2="18"/>`;
   }
   return svg;
 }
 
 // Initialize share button
 const shareBtn = document.getElementById("share");
-shareBtn.appendChild(createShareIcon());
+shareBtn.appendChild(createGenderIcon());
 
-// On click toggle gender and icon
 shareBtn.addEventListener("click",()=>{
   isMale = !isMale;
   updatePeelStyles();
-  // Animate icon change
+  // Smooth icon change
   const oldIcon = shareBtn.querySelector("svg");
   if(oldIcon) shareBtn.removeChild(oldIcon);
-  shareBtn.appendChild(createShareIcon());
+  shareBtn.appendChild(createGenderIcon());
 });
 </script>
 
