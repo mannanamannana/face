@@ -1,62 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Premium Camera</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Premium Camera Peel</title>
+
 <style>
-  body {
-    margin: 0;
-    background: #000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    font-family: sans-serif;
-  }
-
-  video {
-    width: 100%;
-    max-width: 900px;
-    border-radius: 16px;
-    object-fit: cover;
-  }
-
-  .controls {
-    margin-top: 20px;
-    display: flex;
-    gap: 15px;
-  }
-
-  button {
-    padding: 12px 18px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-  }
-
-  .primary {
-    background: #fff;
-  }
-
-  .secondary {
-    background: #333;
-    color: white;
-  }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+body{
+  background:#000;
+  overflow:hidden;
+  height:100vh;
+}
+video{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+#peel{
+  position:fixed;
+  bottom:140px;
+  left:50%;
+  transform:translateX(-50%);
+  width:80%;
+  max-width:700px;
+  height:90px;
+  border-radius:50px;
+  background:rgba(0,0,0,0.25);
+  backdrop-filter:blur(35px);
+  -webkit-backdrop-filter:blur(35px);
+  border:1px solid rgba(255,255,255,0.15);
+  transition:all 0.3s ease;
+  z-index:10;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  padding:0 20px;
+  gap:15px;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+#peel::-webkit-scrollbar { display:none; }
+#peel { -ms-overflow-style:none; scrollbar-width:none; }
+#peel:hover,
+#peel.active{
+  transform:translateX(-50%) scale(1.05);
+  background:rgba(0,0,0,0.35);
+}
+.hairstyle{
+  min-width:120px;
+  height:70px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.1);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:.2s;
+  font-size:14px;
+  font-weight:600;
+  color:#fff;
+  text-transform:capitalize;
+}
+.hairstyle:hover{
+  transform:scale(1.1);
+  background:rgba(255,255,255,0.2);
+}
+#controls{
+  position:fixed;
+  bottom:35px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:90%;
+  max-width:600px;
+  z-index:20;
+}
+.button{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  backdrop-filter:blur(15px);
+  border:1px solid rgba(255,255,255,0.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:.2s;
+}
+.button:active{ transform:scale(0.9); }
+.button svg{
+  width:28px;
+  height:28px;
+  stroke:#fff;
+  stroke-width:2;
+  fill:none;
+}
+#record-dot{
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:#fff;
+}
+#capture{
+  width:85px;
+  height:85px;
+  border-radius:50%;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:.15s;
+}
+#capture:active{ transform:scale(0.9); }
+#capture-inner{
+  width:65px;
+  height:65px;
+  border-radius:50%;
+  border:4px solid #000;
+}
 </style>
 </head>
 <body>
 
-<video id="video" autoplay playsinline></video>
+<video id="video" autoplay playsinline muted></video>
 
-<div class="controls">
-  <button class="primary" id="capture">Capture</button>
-  <button class="secondary" id="switch">Switch Camera</button>
+<div id="peel">
+  <div class="hairstyle">Box Braids</div>
+  <div class="hairstyle">Cornrows</div>
+  <div class="hairstyle">Afro Puff</div>
+  <div class="hairstyle">Dreadlocks</div>
+  <div class="hairstyle">Bantu Knots</div>
+  <div class="hairstyle">Senegalese Twists</div>
+  <div class="hairstyle">Fulani Braids</div>
+  <div class="hairstyle">Ghana Braids</div>
+  <div class="hairstyle">Crochet Braids</div>
 </div>
 
-<script src="camera.js"></script>
+<div id="controls">
+  <div id="upload" class="button"></div>
+  <div id="record" class="button"><div id="record-dot"></div></div>
+  <div id="capture"><div id="capture-inner"></div></div>
+  <div id="switch-camera" class="button"></div>
+  <div id="share" class="button"></div>
+</div>
+
+<script>
+const video = document.getElementById("video");
+let currentStream;
+let usingFrontCamera = true;
+
+/* 🔥 Improved Camera Start */
+async function startCamera(){
+  if(currentStream){
+    currentStream.getTracks().forEach(track=>track.stop());
+  }
+
+  try{
+    const isHighEnd = window.devicePixelRatio >= 2 && window.innerWidth > 1000;
+
+    const constraints = {
+      video:{
+        facingMode: usingFrontCamera ? "user" : "environment",
+        width: { ideal: isHighEnd ? 1920 : 1280 },
+        height:{ ideal: isHighEnd ? 1080 : 720 },
+        frameRate:{ ideal: 30, max: 60 }
+      },
+      audio:false
+    };
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = stream;
+    currentStream = stream;
+
+    video.style.transform = usingFrontCamera ? "scaleX(-1)" : "scaleX(1)";
+
+    const track = stream.getVideoTracks()[0];
+    const capabilities = track.getCapabilities();
+    const advanced = [];
+
+    if(capabilities.focusMode){
+      advanced.push({ focusMode: "continuous" });
+    }
+    if(capabilities.exposureMode){
+      advanced.push({ exposureMode: "continuous" });
+    }
+
+    if(advanced.length){
+      track.applyConstraints({ advanced }).catch(()=>{});
+    }
+
+    console.log("Resolution:", track.getSettings());
+
+  }catch(err){
+    alert("Camera access denied or unavailable.");
+    console.error(err);
+  }
+}
+
+startCamera();
+
+/* Switch Camera */
+document.getElementById("switch-camera").addEventListener("click",()=>{
+  usingFrontCamera = !usingFrontCamera;
+  startCamera();
+});
+
+/* 🔥 Premium Capture */
+document.getElementById("capture").addEventListener("click", async ()=>{
+
+  const track = currentStream.getVideoTracks()[0];
+
+  if("ImageCapture" in window){
+    try{
+      const imageCapture = new ImageCapture(track);
+      const blob = await imageCapture.takePhoto();
+      const url = URL.createObjectURL(blob);
+      downloadImage(url);
+      return;
+    }catch(e){}
+  }
+
+  const settings = track.getSettings();
+  const canvas = document.createElement("canvas");
+  canvas.width = settings.width;
+  canvas.height = settings.height;
+
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.filter = "contrast(105%) saturate(105%) brightness(102%)";
+
+  ctx.drawImage(video,0,0,canvas.width,canvas.height);
+
+  downloadImage(canvas.toDataURL("image/jpeg",1.0));
+});
+
+function downloadImage(src){
+  const link = document.createElement("a");
+  link.download = "photo.jpg";
+  link.href = src;
+  link.click();
+}
+
+/* Peel interaction */
+const peel = document.getElementById("peel");
+peel.addEventListener("mousedown",()=>peel.classList.add("active"));
+peel.addEventListener("mouseup",()=>peel.classList.remove("active"));
+peel.addEventListener("mouseleave",()=>peel.classList.remove("active"));
+</script>
+
 </body>
 </html>
